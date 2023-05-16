@@ -15,7 +15,76 @@ export const productsController = {
     });
 
     if (pack.length !== 0) {
-      console.log("esta contido");
+      let prods = [{ qty: 1, code: price.product_code, type: "pack" }];
+
+      pack.map((product) => {
+        prods.push({
+          qty: product.dataValues.qty,
+          code: product.dataValues.product_id,
+          type: "prod",
+        });
+      });
+
+      const productPack = await models.Products.findOne({
+        where: { code: prods[0].code },
+      });
+
+      if (productPack?.dataValues.cost_price > newPrice) {
+        errors.push("Valor menor que preço de compra");
+      }
+      if (
+        productPack?.dataValues.sales_price * 0.9 > newPrice ||
+        productPack?.dataValues.sales_price * 1.1 < newPrice
+      ) {
+        errors.push("Valor tem diferença maior que 10%");
+      }
+
+      const newData = 
+        {
+          code: productPack?.dataValues.code,
+          name: productPack?.dataValues.name,
+          sales_price: productPack?.dataValues.sales_price,
+          new_price: newPrice,
+          errors,
+        }
+      ;
+
+      res.send(newData);
+
+      // let teste = prods.slice(1).map(async (prod) => {
+      //   // let errors: string[] = [];
+      //   const product = await models.Products.findOne({
+      //     where: { code: prod.code },
+      //   });
+
+      //   // if (product?.dataValues.cost_price > newPrice) {
+      //   //   errors.push("Valor menor que preço de compra");
+      //   // }
+      //   // if (
+      //   //   product?.dataValues.sales_price * 0.9 > newPrice ||
+      //   //   product?.dataValues.sales_price * 1.1 < newPrice
+      //   // ) {
+      //   //   errors.push("Valor tem diferença maior que 10%");
+      //   // }
+
+      //   // newData.push({
+      //   //   code: productPack?.dataValues.code,
+      //   //   name: productPack?.dataValues.name,
+      //   //   sales_price: productPack?.dataValues.sales_price,
+      //   //   new_price: newPrice,
+      //   //   errors,
+      //   // });
+
+      //   return product;
+      // });
+
+      // console.log(teste);
+
+      // Verificar se alterar o preço do pack quebra as condições
+
+      // Pegar lista de produtos
+
+      // Verificar se alterar o preço do produto quebra a condições
     } else {
       const product = await models.Products.findOne({
         where: { code: price.product_code },
@@ -42,18 +111,6 @@ export const productsController = {
         console.log("Sem produto");
       }
     }
-
-    // Esta contido
-
-    // Verificar se alterar o preço do pack quebra as condições
-
-    // Pegar lista de produtos
-
-    // Verificar se alterar o preço do produto quebra a condições
-
-    // Não esta contido
-
-    // Verificar se alterar o preço do produto quebra a condições
   },
   postUpdate: async (req: Request, res: Response) => {
     let price = req.query;
